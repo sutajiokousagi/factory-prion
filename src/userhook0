@@ -1,0 +1,4 @@
+#!/bin/sh
+. /mnt/usb/factory/config.vars
+. /mnt/usb/install-burner ${BURN_CONFIG}
+

@@ -1,0 +1,5 @@
+ACTION=="add", DRIVERS=="usb-storage", ENV{DEVTYPE}=="usb_interface", SUBSYSTEM=="usb", RUN+="/usr/bin/imgtool --mode=draw /mnt/storage/factory/plswaitkthxbai.jpg"
+ACTION=="remove", DRIVERS=="usb-storage", SUBSYSTEM=="usb", RUN+="/usr/bin/imgtool --mode=draw --fill=255,255,0"
+
+KERNEL=="sda", ACTION=="add", RUN+="/mnt/storage/factory/factory_launcher.sh /dev/%k", OPTIONS="last_rule"
+KERNEL=="sda*", ACTION=="add", RUN+="/mnt/storage/factory/factory_launcher.sh /dev/%k", OPTIONS="last_rule"

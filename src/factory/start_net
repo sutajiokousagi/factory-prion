@@ -1,0 +1,29 @@
+#!/bin/sh
+    while true
+    do
+        echo "Reconnecting to network..."
+    
+        killall udhcpc
+        while ps | grep -v grep | grep -q iwconfig
+        do
+            sleep 1
+        done
+        ifconfig wlan0 down
+        iwconfig wlan0 essid "ChumbyAP"
+        iwconfig wlan0 key 11111111111111111111111111
+        iwconfig wlan0 power off
+        iwconfig wlan0 ap auto
+        ifconfig wlan0 up
+        udhcpc -n -i wlan0
+        IP=$(ifconfig wlan0 | grep 'inet addr' | cut -d: -f2 | cut -d' ' -f1)
+        fbwrite "\nEstablishing connection... IP: ${IP}"
+
+        ROUTER=$(route | grep ^default | awk '{print $2}')
+        fbwrite "\n\nRouter: ${ROUTER}"
+
+        while ping -q -c 1 ${ROUTER} > /dev/null 2> /dev/null
+        do
+            sleep 10
+        done
+        sleep 10
+    done

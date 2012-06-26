@@ -1,0 +1,47 @@
+#!/bin/sh
+#
+# This script is designed to be dot-executed as /psp/rfs1/userhook0 on a
+# chumby One with the BURN_CONFIG passed as a parameter.  It turns the
+# device into an access point, and starts connecting to the VPN via
+# a configured Ethernet connection.
+
+export BURN_CONFIG=$1
+
+start_sshd() {
+    /sbin/sshd
+}
+
+start_httpd() {
+    /usr/sbin/httpd -h /www
+}
+
+
+# Don't go into burner mode if we're in recovery mode.
+# This isn't needed in newer firmwares.
+if [ grep -q partition=recovery /proc/cmdline ]
+then
+    return
+fi
+
+sleep 10
+switch_fb.sh 0
+imgtool --mode=draw --fb=0 /mnt/storage/factory/burner-ready.jpg
+#fbwrite "\nEstablishing connection..."
+
+start_sshd
+/mnt/storage/factory/start_net &
+start_httpd
+
+#IP=$(ifconfig wlan0 | grep 'inet addr' | cut -d: -f2 | cut -d' ' -f1)
+#fbwrite "\nEstablishing connection... IP: ${IP}"
+#fbwrite "\n\nBurner ready for ${BURN_CONFIG}"
+
+touch /tmp/fully-booted
+
+# If /dev/sda exists, then it was inserted when we booted.
+# Launch the factory burner with BURN_CONFIG set in the environment
+# Note: This means that if you want a userhook0 script, to e.g. update the
+# unit, you'll want to have it "exit" at the end.
+[ -e /dev/sda ] && /mnt/storage/factory/factory_launcher.sh /dev/sda
+
+exit 0
